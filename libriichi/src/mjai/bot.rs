@@ -39,6 +39,12 @@ impl Bot {
     fn react_py(&mut self, line: &str, can_act: bool, py: Python<'_>) -> Result<Option<String>> {
         py.allow_threads(move || self.react(line, can_act))
     }
+
+    /// Returns the latest reaction
+    #[pyo3(name = "get_reaction")]
+    fn get_reaction_py(&mut self, py: Python<'_>) -> Result<Option<String>> {
+        py.allow_threads(move || self.get_reaction())
+    }
 }
 
 impl Bot {
@@ -67,6 +73,18 @@ impl Bot {
             return Ok(None);
         }
 
+        self.agent
+            .set_scene(0, &self.log, &self.state, None)
+            .context("failed to add state")?;
+        let reaction = self
+            .agent
+            .get_reaction(0, &self.log, &self.state, None)
+            .context("failed to get reaction")?;
+
+        let ret = json::to_string(&reaction)?;
+        Ok(Some(ret))
+    }
+    fn get_reaction(&mut self) -> Result<Option<String>> {
         self.agent
             .set_scene(0, &self.log, &self.state, None)
             .context("failed to add state")?;
