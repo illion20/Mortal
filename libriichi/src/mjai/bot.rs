@@ -68,7 +68,7 @@ impl Bot {
             }
         };
 
-        let cans = self.state.update(&data.event);
+        let cans = self.state.update(&data.event)?;
         if !can_act || matches!(data.can_act, Some(false)) || !cans.can_act() {
             return Ok(None);
         }
